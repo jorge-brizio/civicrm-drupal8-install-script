@@ -10,6 +10,10 @@ echo "| Author Jorge Alves - jorge@waat.eu."
 echo "-----------------"
 echo "| Let me know if it works for you!"
 
+# Civicrm curren version and file.
+CIVICRM_VERSION="5.31.1"
+CIVICRM_VERSION_FILE="civicrm-5.31.1-l10n.tar.gz"
+
 # Check if Core requirements are installed.
 echo "-----------------"
 echo "| Checking core requirements."
@@ -126,15 +130,14 @@ echo '-----------------'
 echo 'Installing translations'
 # Install l10n and sql dependencies.
 echo "-----------------"
-CIVICRM_VERSION="5.31.1"
 read -p $"Would you like to install the version $CIVICRM_VERSION ([Y]es, [N]o)" -n 1 -r
 sleep 1
 if [[ $REPLY =~ ^[Yy]$ ]]
 then
   echo ''
-  wget https://download.civicrm.org/civicrm-5.31.1-l10n.tar.gz
-  tar -zxvf civicrm-5.31.1-l10n.tar.gz
-  rm civicrm-5.31.1-l10n.tar.gz
+  wget https://download.civicrm.org/$CIVICRM_VERSION_FILE
+  tar -zxvf $CIVICRM_VERSION_FILE
+  rm $CIVICRM_VERSION_FILE
 else
   read -p $'Which version would you like to install (provide the full http path to the download tar.gz file)?' -n 1 -r
   NEW_FILE_URL=$REPLY
