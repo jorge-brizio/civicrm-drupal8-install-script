@@ -3,14 +3,13 @@
 # Initiate log file.
 echo '' > log.txt
 
+# Check if Core requiremtns are installed.
 echo "-----------------"
 echo "| Welcome to CiviCRM installation script for Drupal 8."
 echo "-----------------"
 echo "| Author Jorge Alves - jorge@waat.eu."
 echo "-----------------"
 echo "| Let me know if it works for you!"
-
-# Check if Core requirements are available.
 echo "-----------------"
 echo "| Checking core requirements."
 echo "-----------------"
@@ -126,7 +125,6 @@ fi
 
 #Dummy data.
 DUMMY_DATA=0
-if [[ $REPLY =~ ^[Yy]$ ]]
 read -p $'\x0aPopulate Civicrm with dummy content: ([Y]es, [N]o)' -n 1 -r
 if [[ $REPLY =~ ^[Yy]$ ]]
 then
@@ -138,7 +136,7 @@ echo '-----------------'
 echo 'Creating database'
 mysql -u$CIVICRM_DATABASE_USER -p$CIVICRM_DATABASE_PASS -e "create database $CIVICRM_DATABASE" &>> log.txt
 grep -i '^Query\|^Warning\|^ERROR' log.txt
-if [ $? == 0 ]; then
+if [[ $? == 0 ]]; then
    echo "Exiting: error in MySql."
     exit 1
 fi
