@@ -3,13 +3,14 @@
 # Initiate log file.
 echo '' > log.txt
 
-# Check if Core requiremtns are installed.
 echo "-----------------"
 echo "| Welcome to CiviCRM installation script for Drupal 8."
 echo "-----------------"
 echo "| Author Jorge Alves - jorge@waat.eu."
 echo "-----------------"
 echo "| Let me know if it works for you!"
+
+# Check if Core requirements are installed.
 echo "-----------------"
 echo "| Checking core requirements."
 echo "-----------------"
