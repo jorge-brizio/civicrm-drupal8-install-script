@@ -3,13 +3,14 @@
 # Initiate log file.
 echo '' > log.txt
 
-# Check if Core requiremtns are installed.
 echo "-----------------"
 echo "| Welcome to CiviCRM installation script for Drupal 8."
 echo "-----------------"
-echo "| Author Jorge Alves contact - jorge@waat.eu."
+echo "| Author Jorge Alves - jorge@waat.eu."
 echo "-----------------"
 echo "| Let me know if it works for you!"
+
+# Check if Core requirements are available.
 echo "-----------------"
 echo "| Checking core requirements."
 echo "-----------------"
@@ -58,17 +59,10 @@ then
 
 # Installation begins.
 echo "-----------------"
-read -p $'Would you like to create an empty civicrm database? ([Y]es, [N]o)' -n 1 -r
-if [[ $REPLY =~ ^[Yy]$ ]]
-then
-    read -p $'\x0aName of database to create:' CIVICRM_DATABASE
-    read -p $'\x0aDatabase user:' CIVICRM_DATABASE_USER
-    read -p $'\x0aDatabase user password:' CIVICRM_DATABASE_PASS
-else
-    read -p $'\x0aName of database to use:' CIVICRM_DATABASE
-    read -p $'\x0aDatabase user:' CIVICRM_DATABASE_USER
-    read -p $'\x0aDatabase user password:' CIVICRM_DATABASE_PASS
-fi
+read -p $'\x0aName of database to use(if database doesn\'t exist yet it will be created.):' CIVICRM_DATABASE
+read -p $'\x0aDatabase user:' CIVICRM_DATABASE_USER
+read -p $'\x0aDatabase user password:' CIVICRM_DATABASE_PASS
+
 sleep 1
 echo '-----------------'
 echo '| Composer'
@@ -122,11 +116,21 @@ cp -R sql/ ../vendor/civicrm/civicrm-core/
 cd ..
 rm -rf civicrm/
 # Installing civicrm base and lang.
-read -p $'\x0aEnter CMS base url (ex: http://foobar.com/):' CMS_BASE_URL
+echo 'CMS base url ex: http://mydrupal.site/'
+read -p $'\x0aEnter CMS base url:' CMS_BASE_URL
 read -p $'\x0aEnter prefered language (defaults to en_GB):' LANG_CIVICRM
-if [[ -z ${LANG_CIVICRM} ]];
+if [[ -z ${LANG_CIVICRM} ]]
 then
 LANG_CIVICRM='en_GB'
+fi
+
+#Dummy data.
+DUMMY_DATA=0
+if [[ $REPLY =~ ^[Yy]$ ]]
+read -p $'\x0aPopulate Civicrm with dummy content: ([Y]es, [N]o)' -n 1 -r
+if [[ $REPLY =~ ^[Yy]$ ]]
+then
+DUMMY_DATA=1
 fi
 
 # Create database.
@@ -143,7 +147,8 @@ echo "Database created succesfully [OK]"
 
 echo '-----------------'
 echo 'Installing'
-cv core:install --cms-base-url="$CMS_BASE_URL" --lang="$LANG_CIVICRM" --db="mysql://$CIVICRM_DATABASE_USER:$CIVICRM_DATABASE_PASS@localhost:/$CIVICRM_DATABASE"  -m loadGenerated=1 -v
+cv core:install --cms-base-url="$CMS_BASE_URL" --lang="$LANG_CIVICRM" --db="mysql://$CIVICRM_DATABASE_USER:$CIVICRM_DATABASE_PASS@localhost:/$CIVICRM_DATABASE"  -m loadGenerated=$DUMMY_DATA -v
+
 # Cleaning up.
 rm log.txt
 
