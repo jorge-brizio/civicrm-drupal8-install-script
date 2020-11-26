@@ -29,7 +29,7 @@ else
 fi
 sleep 1
 # PHP Extensions
-echo "| PHP Extesions"
+echo "| PHP Extensions"
 echo "-----------------"
 AVAILABLE_EXTENSIONS=$(dpkg -l | grep php$PHPVERMAJOR)
 REQUIRED_EXT=(bcmath curl xml mbstring zip intl)
@@ -57,13 +57,47 @@ then
   exit 1
   fi
 
-# Installation begins.
+# Create CiviCRM database.
 echo "-----------------"
-read -p $'\x0aName of database to use(if database doesn\'t exist yet it will be created.):' CIVICRM_DATABASE
-read -p $'\x0aDatabase user:' CIVICRM_DATABASE_USER
-read -p $'\x0aDatabase user password:' CIVICRM_DATABASE_PASS
+read -p $'Would you like to create an empty civicrm database? ([Y]es, [N]o)' -n 1 -r
+if [[ $REPLY =~ ^[Yy]$ ]]
+then
+    read -p $'\x0aName of database to create:' CIVICRM_DATABASE
+    read -p $'\x0aDatabase user:' CIVICRM_DATABASE_USER
+    read -p $'\x0aDatabase user password:' CIVICRM_DATABASE_PASS
+    mysql -u$CIVICRM_DATABASE_USER -p$CIVICRM_DATABASE_PASS -e "create database $CIVICRM_DATABASE" &>> log.txt
+    grep -i '^Query\|^Warning\|^ERROR' log.txt
+      if [ $? == 0 ]; then
+        echo "Error in MySql."
+        exit 1
+      fi
+    echo "Database created [OK]"
+else
+    read -p $'\x0aName of database:' CIVICRM_DATABASE
+    read -p $'\x0aDatabase user:' CIVICRM_DATABASE_USER
+    read -p $'\x0aDatabase user password:' CIVICRM_DATABASE_PASS
+fi
+
+echo '-----------------'
+# Installing civicrm config installation.
+echo 'CMS base url ex: http://mydrupal.site/'
+read -p $'\x0aEnter CMS base url:' CMS_BASE_URL
+read -p $'\x0aEnter prefered language (defaults to en_GB):' LANG_CIVICRM
+if [[ -z ${LANG_CIVICRM} ]]
+  then
+    LANG_CIVICRM='en_GB'
+fi
+
+#Dummy data.
+DUMMY_DATA=0
+read -p $'\x0aPopulate Civicrm with dummy content: ([Y]es, [N]o)' -n 1 -r
+if [[ $REPLY =~ ^[Yy]$ ]]
+then
+DUMMY_DATA=1
+fi
 
 sleep 1
+echo ''
 echo '-----------------'
 echo '| Composer'
 # Check if composer is installed.
@@ -109,40 +143,14 @@ else
   tar -zxvf $FILE_CIVICRM
   rm $FILE_CIVICRM
 fi
+
 # Moving files.
 cd civicrm/
 cp -R l10n/ ../vendor/civicrm/civicrm-core/
 cp -R sql/ ../vendor/civicrm/civicrm-core/
 cd ..
 rm -rf civicrm/
-# Installing civicrm base and lang.
-echo 'CMS base url ex: http://mydrupal.site/'
-read -p $'\x0aEnter CMS base url:' CMS_BASE_URL
-read -p $'\x0aEnter prefered language (defaults to en_GB):' LANG_CIVICRM
-if [[ -z ${LANG_CIVICRM} ]]
-then
-LANG_CIVICRM='en_GB'
-fi
 
-#Dummy data.
-DUMMY_DATA=0
-read -p $'\x0aPopulate Civicrm with dummy content: ([Y]es, [N]o)' -n 1 -r
-if [[ $REPLY =~ ^[Yy]$ ]]
-then
-DUMMY_DATA=1
-fi
-
-# Create database.
-echo '-----------------'
-echo 'Creating database'
-mysql -u$CIVICRM_DATABASE_USER -p$CIVICRM_DATABASE_PASS -e "create database $CIVICRM_DATABASE" &>> log.txt
-grep -i '^Query\|^Warning\|^ERROR' log.txt
-if [[ $? == 0 ]]; then
-   echo "Exiting: error in MySql."
-    exit 1
-fi
-sleep 1
-echo "Database created succesfully [OK]"
 
 echo '-----------------'
 echo 'Installing'
@@ -151,4 +159,6 @@ cv core:install --cms-base-url="$CMS_BASE_URL" --lang="$LANG_CIVICRM" --db="mysq
 # Cleaning up.
 rm log.txt
 
-echo "We're done! Happy CIVICRM!"
+echo "We're done, you can now access your CiviCRM."
+sleep 1
+echo 'Bye!'
